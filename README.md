@@ -19,6 +19,16 @@ The person leaving types `/dementor-upload` to their own AI agent; the person ta
 
 > Prompts and the generated documents are in Korean. The procedures run fine in any Claude Code or Codex session, but the handoff package comes out in Korean.
 
+[Demo](#demo) · [Why](#why) · [Getting started](#getting-started-admin-once) · [Leaver](#leaver) · [Successor](#successor) · [Reviewer](#reviewer) · [Layout](#layout) · [Safeguards](#safeguards) · [Requirements](#requirements) · [Limitations](#limitations)
+
+## Demo
+
+<p align="center">
+  <img src=".github/assets/demo.gif" alt="Terminal demo: /dementor-upload collects, runs qa.sh, opens a PR and prints the hand-over-in-person checklist; /dementor-inherit jane.doe writes the summary, plants memory pointers and prints the questions to ask the predecessor" width="100%">
+</p>
+
+Scripted walkthrough on a fictional company (`acme.com`, leaver `jane.doe`, successor `j.kim`): the agent lines are condensed to the representative moments; the `qa.sh` run is real. Regenerate with [`vhs`](https://github.com/charmbracelet/vhs)` .github/assets/demo.tape`; the script is `.github/assets/demo.sh`.
+
 ## Why
 
 Handover documents only contain what the writer happens to remember. In practice, the most-opened part of a handover package was not the summary document but the predecessor's raw AI memory — that is where the "why we decided this", "where it broke", and "never do this again" lived.
