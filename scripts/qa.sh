@@ -122,10 +122,16 @@ fi
 # password/token 류는 값 뒤에 '(' 가 오는 함수 호출(token = fn(...))을 제외한다.
 Q="'"
 SECRET_RE='(AKIA|ASIA)[0-9A-Z]{16}'
-SECRET_RE="$SECRET_RE|xox[abp]-[A-Za-z0-9-]{10,}"
+SECRET_RE="$SECRET_RE|xox[abpesr]-[A-Za-z0-9-]{10,}"
+SECRET_RE="$SECRET_RE|xapp-[0-9]-[A-Z0-9]+-[0-9]+-[a-z0-9]+"
 SECRET_RE="$SECRET_RE|(^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}"
 SECRET_RE="$SECRET_RE|gh[pousr]_[A-Za-z0-9]{36}"
 SECRET_RE="$SECRET_RE|github_pat_[A-Za-z0-9_]{20,}"
+SECRET_RE="$SECRET_RE|gl(pat|dt|rt|ptt|soat|cbt|agent|ft)-[A-Za-z0-9_-]{20,}"
+SECRET_RE="$SECRET_RE|lin_(api|oauth)_[A-Za-z0-9]{32,}"
+SECRET_RE="$SECRET_RE|sntrys_[A-Za-z0-9_=-]{20,}"
+SECRET_RE="$SECRET_RE|ntn_[A-Za-z0-9]{30,}"
+SECRET_RE="$SECRET_RE|ATATT3[A-Za-z0-9_=-]{20,}"
 SECRET_RE="$SECRET_RE|AIza[0-9A-Za-z_-]{35}"
 SECRET_RE="$SECRET_RE|-----BEGIN [A-Z ]*PRIVATE KEY-----"
 SECRET_RE="$SECRET_RE|hooks\\.slack\\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[A-Za-z0-9]+"

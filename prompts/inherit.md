@@ -69,7 +69,7 @@
   2. `bash scripts/qa.sh <id>` 를 돌린다. qa.sh 는 `<id>/` 전체(전임자 원문 포함)를 검사하므로 히트를 경로로 나눈다: `bash scripts/qa.sh <id> | grep -F -- "/<id>/inherit/"` 가 비어 있지 않으면(내 요약 파일의 히트) 커밋하지 말고 그 줄을 고쳐 다시 돌린다. 그 밖의 히트(전임자 원문 — 인계자 수정 금지)는 요약 §0 에 "기존 패키지 QA 히트 N건" 과 **`경로:행` 만** 적고 커밋은 진행한다 — qa.sh 출력 각 줄의 `: <일치 문자열>` 부분(24자까지 — AKIA 키 20자·휴대폰 번호 13자가 통째로 들어간다)은 §0 에도 PR 본문에도 옮기지 않는다. 이 경우 PR 의 `qa` 워크플로도 같은 히트로 실패하므로 PR 본문에 그 사실과 `경로:행` 목록을 적는다. 요약 파일을 **한 글자라도 고친 뒤에는**(§0 에 히트를 적는 편집 포함) 반드시 `bash scripts/qa.sh <id> | grep -F -- "/<id>/inherit/"` 를 다시 돌려 비어 있을 때만 커밋한다.
   3. 요약 파일만 스테이징: `git add <id>/inherit/<me>-<YYYY-MM-DD>.md` → `git commit -m "feat: add inherit summary <id> → <me> (<YYYY-MM-DD>)"`.
   4. **push 는 사용자에게 묻는다**(허락 전 푸시 금지). 허락하면 `AGENTS.md` 안전 규칙의 공개 레포 확인을 먼저 하고(`PUBLIC` 이면 푸시하지 않고 멈춘다) `git push -u origin inherit/<me>-<id>`.
-  5. `gh` 가 있으면 `gh pr create --base main --head inherit/<me>-<id> --title "inherit: <id> → <me>" --body "<요약 §0·§7 요약>"`. 없으면 push 출력에 나온 PR 생성 URL 을 사용자에게 안내한다.
+  5. `gh` 가 있으면 PR 본문을 **작은따옴표 heredoc** 으로 넘긴다(본문의 백틱·`$(` 가 셸에서 실행되지 않게): `gh pr create --base main --head inherit/<me>-<id> --title "inherit: <id> → <me>" --body-file - <<'EOF'` … `EOF` — 본문은 요약 §0·§7 요약. 없으면 push 출력에 나온 PR 생성 URL 을 사용자에게 안내한다.
 
 ## 3단계 — 매핑: 전임자 메모리 디렉터리 ↔ 인계자 로컬 레포
 
@@ -139,7 +139,7 @@ awk -F'\t' '$2 == ""' "$W/local-repos.all.tsv"   # origin 없는 레포 — 목�
 
 > 시크릿 값·비밀번호는 패키지에 없습니다. 전임자가 아직 재직 중이면 위 질문을 지금 물어보세요 — 퇴사 후에는 답할 사람이 없습니다. 답은 이 요약 파일 §1·§2 의 해당 항목에 적고, `bash scripts/qa.sh <id> | grep -F -- "/<id>/inherit/"` 가 비어 있는지 확인한 뒤 같은 브랜치에 다시 커밋하세요.
 
-사용자가 답하기 전에는 **아무것도 복사하지 않는다**.
+사용자가 답하기 전에는 **아무것도 복사하지 않는다**. 보고를 마치면 작업 폴더를 지운다: `rm -rf "$(git rev-parse --show-toplevel)/.dementor-work"` — 안에 인계자 머신의 레포 경로·origin 전수 목록(개인 레포 포함)이 평문으로 있기 때문이다. 6단계는 이 폴더를 쓰지 않는다.
 
 ## 6단계 — "복사해" 를 받았을 때만
 
