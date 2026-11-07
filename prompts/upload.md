@@ -67,4 +67,8 @@ memory-export 와 handoff §7·§8·§10 만 근거로: 설계 철학과 판단 
 2. 레포 루트에서 `bash scripts/qa.sh <id>` 를 돌린다. PASS 가 아니면 커밋하지 말고 히트된 파일·줄을 그대로 보여주고 멈춘다. 사용자가 고친 뒤 다시 돌린다.
 3. PASS 면 `git add <id>/handoff.md <id>/persona.md <id>/appendix <id>/memory-export <id>/_raw` (`_raw` 는 `.gitignore` 가 스크립트만 남긴다, 없으면 생략) → `git commit -m "feat: add <id> handoff package (<YYYY-MM-DD>)"`. `<id>/inherit/` 와 `<id>/` 밖의 파일은 스테이징하지 않는다.
 4. `git push -u origin soul/<id>`. 거절되면(non-fast-forward 등) `--force` 하지 말고 멈춰서 사용자에게 알린다.
-5. `gh` 가 있으면 `gh pr create --base main --head soul/<id> --title "soul: <id>" --body "<handoff.md §0 수집 상태 표 요약>"`. 없으면 push 출력에 나온 PR 생성 URL 을 사용자에게 안내하고 끝낸다.
+5. **"퇴사 전에 직접 넘겨야 할 것"** 목록을 만든다(고정 제목). 출처 세 곳만 쓴다 — `handoff.md` §3 의 행(즉시 조치 순 그대로), `appendix/17-tracked-*` 각 파일의 "후임이 할 일" 절, `handoff.md` §12 의 "여전히 미확인" 항목. 한 줄 형식은 `- [ ] <항목> — <위치/근거> — <퇴사 전에 내가 할 일 또는 후임이 할 일>` 이고, 시크릿은 값 없이 이름·위치·만료일만 쓴다(키 회전·유일 admin 레포 양도·개인 계정으로 도는 자동화 이관·공용 계정 비밀번호 전달 같은 것이 여기 온다). 목록 끝에 아래 문단을 그대로 붙인다:
+
+   > 위 항목은 시크릿 값·비밀번호가 패키지에 들어 있지 않아 사람끼리 넘겨야 하는 것입니다. 퇴사일 전에 인계자와 함께 하나씩 처리하세요. 인계자에게는 `/dementor-inherit <id>` 를 내가 재직 중일 때 돌려 달라고 하세요 — 그 절차 끝에 나오는 질문 목록은 퇴사 후에는 답할 사람이 없습니다.
+
+6. `gh` 가 있으면 `gh pr create --base main --head soul/<id> --title "soul: <id>" --body "<handoff.md §0 수집 상태 표 요약 + 5 의 목록과 문단>"`. 없으면 push 출력에 나온 PR 생성 URL 을 사용자에게 안내한다. 어느 쪽이든 마지막 메시지에 5 의 목록과 문단을 그대로 다시 출력하고 끝낸다.

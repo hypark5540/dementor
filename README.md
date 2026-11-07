@@ -66,12 +66,16 @@
 
 수집 뒤에는 "내 계정이 꺼지면 깨지는 것" 후보 10개 안팎을 지금 시각에 다시 조회해 확인하고(`17-tracked-*`), 이를 합쳐 `handoff.md` 와 `persona.md` 를 쓴다. 모든 문장에 근거(appendix 파일이나 URL)가 붙고, 추정은 `(추정)` 으로 표시된다.
 
+시크릿 값·비밀번호·개인 연락처는 패키지에 들어가지 않는다(이름·위치·만료일만). 그래서 절차 끝에 **"퇴사 전에 직접 넘겨야 할 것"** 체크리스트가 터미널과 PR 본문에 나온다 — 키 회전, 유일 admin 레포 양도, 개인 계정으로 도는 자동화 이관 같은 것이다. 퇴사일 전에 인계자와 함께 하나씩 처리한다.
+
 ## 인계자
 
 1. 회사의 dementor 레포를 클론한다(이미 있으면 `git pull`).
 2. 레포 루트에서 Claude Code 나 Codex 를 연다.
 3. 한 줄 입력: `/dementor-inherit <전임자id>` 또는 "<전임자id> 인계받을게".
 4. 10~20분 뒤 `<전임자id>/inherit/<내id>-<날짜>.md` 요약이 생기고, 내 로컬 AI 메모리에 전임자 포인터가 붙는다. 원문은 필요할 때만 열면 된다.
+
+**전임자의 퇴사일 전에 돌린다.** 절차 끝에 **"전임자에게 지금 확인할 것"** 질문 목록이 나오는데, 시크릿 값과 권한처럼 사람이 넘겨야 하는 것이라 퇴사 후에는 답할 사람이 없다. 답은 요약 파일에 적어 다시 커밋한다.
 
 요약은 "지금 당장 깨질 수 있는 것 → 미완 작업 → 반복 운영 → 함정·교훈 → 페르소나 핵심" 순서다. 전임자의 메모리 디렉터리와 내 로컬 레포는 origin 으로 짝을 맞추고, 짝이 맞은 레포의 메모리에만 링크 두 줄을 붙인다. 더 깊이 들이고 싶으면 전임자의 feedback 유형 메모리만 `inherited_<id>_` 접두어 사본으로 복사할 수 있고, 명령 두 줄로 되돌릴 수 있다.
 
@@ -133,8 +137,8 @@ scripts/qa.test.sh                qa.sh 테스트
 ## English quick start
 
 1. **Admin, once** — create a **private** repo in your org from this template, set `COMPANY_DOMAIN` in `.dementorrc` to your company email domain, and protect `main` (PRs required, `qa` check required). Never push a package to this public repo or a fork of it.
-2. **Leaver** — clone the private repo, open Claude Code or Codex at its root, and type `/dementor-upload` (Codex: "영혼 업로드"). In 1–2 hours a PR opens on `soul/<id>` with `handoff.md`, `persona.md`, 18 source appendices, and a copy of your AI memory. Collection is read-only; secret values, private DMs, and personal projects are excluded.
-3. **Successor** — in the same repo, type `/dementor-inherit <id>`. You get a summary under `<id>/inherit/` and pointer links in your local AI memory, not copies.
+2. **Leaver** — clone the private repo, open Claude Code or Codex at its root, and type `/dementor-upload` (Codex: "영혼 업로드"). In 1–2 hours a PR opens on `soul/<id>` with `handoff.md`, `persona.md`, 18 source appendices, and a copy of your AI memory. Collection is read-only; secret values, private DMs, and personal projects are excluded. The run ends with a "hand over in person before you leave" checklist (key rotation, sole-admin repos, automations on your personal account) in the terminal and the PR body.
+3. **Successor** — in the same repo, type `/dementor-inherit <id>` **before the leaver's last day**. You get a summary under `<id>/inherit/`, pointer links in your local AI memory (not copies), and a "ask the leaver now" question list for everything that only a person can hand over.
 4. **Reviewer** — merge when the `qa` check passes. It fails on any secret or phone-number pattern.
 
 ## License
