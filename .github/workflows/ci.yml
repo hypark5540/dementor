@@ -1,0 +1,42 @@
+# 도구 자체 검사: 셸 린트와 scripts/qa.sh 테스트. 패키지(<id>/) 검사는 qa.yml 이 맡는다.
+# scripts/ 나 이 파일이 바뀔 때만 돈다 — 패키지 PR 마다 macOS 러너를 쓰지 않기 위해서다.
+# 그래서 브랜치 보호의 필수 검사로 지정하지 않는다(경로 밖 PR 은 상태가 영원히 pending 이 된다). 필수 검사는 qa.yml 의 `qa` 다.
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths: ["scripts/**", ".github/workflows/ci.yml"]
+  pull_request:
+    paths: ["scripts/**", ".github/workflows/ci.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+
+      - name: ShellCheck (ubuntu 러너에 기본 설치)
+        if: runner.os == 'Linux'
+        run: shellcheck scripts/*.sh
+
+      - name: qa.sh 테스트 (macOS 는 기본 /bin/bash 3.2 와 BSD grep)
+        run: |
+          /bin/bash --version | head -n 1
+          /bin/bash scripts/qa.test.sh

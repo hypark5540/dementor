@@ -1,0 +1,23 @@
+.DS_Store
+.build-src/
+
+# <id>/_raw/ 는 원본 덤프라 추적하지 않되, 수집 스크립트(.sh .py)만 남긴다. 부정 패턴은 제외 패턴 뒤에 와야 동작한다.
+*/_raw/*
+!*/_raw/*.sh
+!*/_raw/*.py
+
+# 작업·생성 중간물
+*/appendix/_work/
+*/appendix/_gen/
+
+# 설정·토큰 파일은 memory-export 어디에도 들어가지 않는다(upload.md F 가 지우고, 여기서 한 번 더 막는다)
+*/memory-export/**/.env
+*/memory-export/**/.env.*
+*/memory-export/**/*.env
+*/memory-export/**/settings*.json
+*/memory-export/**/.credentials.json
+*/memory-export/**/*mcp*.json
+*/memory-export/**/config.toml
+*/memory-export/**/auth.json
+*/memory-export/**/*.pem
+*/memory-export/**/*.key

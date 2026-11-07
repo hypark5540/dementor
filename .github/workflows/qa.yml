@@ -1,0 +1,44 @@
+# PR 에서 변경된 ID 폴더(<id>/ = 회사 이메일 @ 앞부분)마다 scripts/qa.sh 를 돌린다.
+# 하나라도 QA: FAIL 이면 job 이 실패한다. 변경된 ID 폴더가 없으면 성공.
+name: qa
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: 변경된 ID 폴더마다 scripts/qa.sh 실행
+        env:
+          BASE: ${{ github.base_ref }}
+        run: |
+          # 변경 파일의 최상위 디렉터리 중 ID 정규식 ^[a-z0-9]+(\.[a-z0-9]+)*$ 에 맞는 것만(레포 자체 폴더 scripts/prompts 제외), 중복 제거
+          ids=$(git diff --name-only "origin/$BASE...HEAD" \
+            | awk -F/ 'NF > 1 { print $1 }' \
+            | grep -E '^[a-z0-9]+(\.[a-z0-9]+)*$' \
+            | grep -v -E '^(scripts|prompts)$' \
+            | sort -u)
+          if [ -z "$ids" ]; then
+            echo "no soul folders changed"
+            exit 0
+          fi
+          fail=0
+          for id in $ids; do
+            if [ ! -d "$id" ]; then
+              echo "skip: $id/ (폴더 없음 — 삭제된 PR 이거나 경로만 변경)"
+              continue
+            fi
+            echo "::group::qa $id"
+            bash scripts/qa.sh "$id" || fail=1
+            echo "::endgroup::"
+          done
+          exit "$fail"

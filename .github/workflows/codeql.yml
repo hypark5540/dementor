@@ -1,0 +1,40 @@
+# 워크플로 파일(.github/workflows)의 보안 분석.
+# 비공개 레포의 code scanning 은 GitHub Code Security 가 켜져 있어야 동작하므로, 템플릿으로 만든 비공개 레포에서는 건너뛴다.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: "41 3 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze GitHub Actions workflows
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write # CodeQL SARIF 결과를 code scanning 에 올린다.
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@e0647621c2984b5ed2f768cb892365bf2a616ad1 # v4.37.2
+        with:
+          languages: actions
+          queries: security-extended
+      - uses: github/codeql-action/analyze@e0647621c2984b5ed2f768cb892365bf2a616ad1 # v4.37.2
+        with:
+          category: /language:actions
