@@ -15,9 +15,12 @@
 */memory-export/**/.env.*
 */memory-export/**/*.env
 */memory-export/**/settings*.json
-*/memory-export/**/.credentials.json
+*/memory-export/**/*credentials*.json
 */memory-export/**/*mcp*.json
 */memory-export/**/config.toml
 */memory-export/**/auth.json
 */memory-export/**/*.pem
 */memory-export/**/*.key
+
+# 인계 절차(prompts/inherit.md)의 작업 파일. 레포 루트 아래에 만들고 커밋하지 않는다.
+.dementor-work/

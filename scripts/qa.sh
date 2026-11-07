@@ -84,11 +84,16 @@ fi
 echo
 echo "-- 차단 검사 (1건이라도 있으면 FAIL)"
 
-# 검사 대상: <id>/ 안의 handoff.md persona.md appendix/ memory-export/ inherit/ 중 존재하는 것
+# 검사 대상: <id>/ 안의 handoff.md persona.md appendix/ memory-export/ inherit/ 중 존재하는 것,
+# 그리고 _raw/ 의 수집 스크립트(.sh .py — .gitignore 가 추적을 남기는 유일한 _raw 파일). _raw/ 의 데이터 덤프와
+# _work/ _gen/ 은 커밋되지 않으므로 보지 않는다(로컬 QA 와 CI 가 같은 결과를 낸다).
 targets=()
 for t in handoff.md persona.md appendix memory-export inherit; do
   [ -e "$DIR/$t" ] && targets+=("$DIR/$t")
 done
+if [ -d "$DIR/_raw" ]; then
+  while IFS= read -r f; do targets+=("$f"); done < <(find "$DIR/_raw" -type f \( -name '*.sh' -o -name '*.py' \) | sort)
+fi
 
 # 회사 도메인 = <레포루트>/.dementorrc 의 COMPANY_DOMAIN 값. 파일을 source 하지 않고 값만 읽는다.
 # 비었거나 example.com(템플릿 기본값)이거나 도메인에 못 쓰는 문자가 있으면 미설정으로 본다.
@@ -116,16 +121,16 @@ fi
 # sk- 는 앞 경계를 둬 task-/disk- 같은 일반 단어를 피하고,
 # password/token 류는 값 뒤에 '(' 가 오는 함수 호출(token = fn(...))을 제외한다.
 Q="'"
-SECRET_RE='AKIA[0-9A-Z]{16}'
+SECRET_RE='(AKIA|ASIA)[0-9A-Z]{16}'
 SECRET_RE="$SECRET_RE|xox[abp]-[A-Za-z0-9-]{10,}"
 SECRET_RE="$SECRET_RE|(^|[^A-Za-z0-9])sk-[A-Za-z0-9_-]{20,}"
-SECRET_RE="$SECRET_RE|ghp_[A-Za-z0-9]{36}"
+SECRET_RE="$SECRET_RE|gh[pousr]_[A-Za-z0-9]{36}"
 SECRET_RE="$SECRET_RE|github_pat_[A-Za-z0-9_]{20,}"
 SECRET_RE="$SECRET_RE|AIza[0-9A-Za-z_-]{35}"
 SECRET_RE="$SECRET_RE|-----BEGIN [A-Z ]*PRIVATE KEY-----"
 SECRET_RE="$SECRET_RE|hooks\\.slack\\.com/services/T[A-Z0-9]+/B[A-Z0-9]+/[A-Za-z0-9]+"
 SECRET_RE="$SECRET_RE|eyJ[A-Za-z0-9_-]{20,}\\.eyJ[A-Za-z0-9_-]{20,}"
-SECRET_RE="$SECRET_RE|(password|passwd|secret|token)[[:space:]]*[:=][[:space:]]*[\"$Q]?[A-Za-z0-9/+_-]{12,}([^A-Za-z0-9/+_(-]|\$)"
+SECRET_RE="$SECRET_RE|(password|passwd|secret|token|api_?key)[[:space:]]*[:=][[:space:]]*[\"$Q]?[A-Za-z0-9/+=_-]{12,}([^A-Za-z0-9/+=_(-]|\$)"
 # ponytail: 한국 휴대폰 형식만 잡는다. 다른 나라 번호가 필요하면 PHONE_RE 에 | 로 패턴을 더한다.
 # 전화번호(한국 휴대폰). 앞뒤 숫자 경계를 둬 긴 숫자열(계정 번호·프로젝트 번호) 안의 부분 일치를 피하고,
 # 앞 경계에서 영숫자·밑줄·하이픈 직후를 제외해 슬러그/ID 꼬리(gen-lang-client-NNNN)도 제외한다.

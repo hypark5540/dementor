@@ -59,6 +59,21 @@ check "함수 호출(token = fn(...))은 PASS" 0 '^QA: PASS$' jane.doe
 pkg jane.doe; mkdir -p "$T/jane.doe/appendix/_work"; echo "key: $AWS_KEY" > "$T/jane.doe/appendix/_work/dump.txt"
 check "커밋되지 않는 _work/ 는 검사하지 않는다" 0 '^QA: PASS$' jane.doe
 
+pkg jane.doe; mkdir -p "$T/jane.doe/_raw"; echo "key: $AWS_KEY" > "$T/jane.doe/_raw/dump.json"
+check "커밋되지 않는 _raw/ 데이터는 검사하지 않는다" 0 '^QA: PASS$' jane.doe
+
+pkg jane.doe; mkdir -p "$T/jane.doe/_raw"; echo "TOKEN=$AWS_KEY" > "$T/jane.doe/_raw/collect.sh"
+check "커밋되는 _raw/*.sh 수집 스크립트는 검사한다" 1 '/_raw/collect\.sh:1:' jane.doe
+
+pkg jane.doe; echo "key: ASIA""ABCDEFGHIJKLMNOP" >> "$T/jane.doe/handoff.md"
+check "AWS 임시 키(ASIA)는 FAIL" 1 '^시크릿 패턴: 1건$' jane.doe
+
+pkg jane.doe; echo "gho_""ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" >> "$T/jane.doe/handoff.md"
+check "GitHub OAuth 토큰(gho_)은 FAIL" 1 '^시크릿 패턴: 1건$' jane.doe
+
+pkg jane.doe; echo 'api_key: abcdefghijklmnop==' >> "$T/jane.doe/handoff.md"
+check "api_key 값(base64 패딩 포함)은 FAIL" 1 '^시크릿 패턴: 1건$' jane.doe
+
 pkg jane.doe; echo 'owner a@acme.com, vendor b@gmail.com' >> "$T/jane.doe/handoff.md"
 check "회사 도메인(.dementorrc) 이메일은 외부로 세지 않는다" 0 '밖 이메일\(정보성\): 1건  도메인: gmail\.com' jane.doe
 
