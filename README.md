@@ -59,11 +59,11 @@ What the agent collects:
 
 | Collector | Source | Output (`<id>/appendix/`) |
 |---|---|---|
-| A | GitHub — every PR of mine, open PRs, repo permissions, repos where I am the only admin, workflow and secret *names* | `01` `02` |
+| A | GitHub, GitLab — every PR/MR of mine, open ones, repo and group permissions, repos where I am the only admin/Owner, workflow, CI variable and secret *names* | `01` `02` `19` |
 | B | Local repos, machine, documents — unpushed commits, stashes, cloud profiles, schedulers, CLI configuration | `03` `07` `14` |
-| C | Jira, Confluence — everything In Progress / To Do, epics I own, runbook pages | `04` `05` |
-| D | Notion, Slack — canonical documents, bots and alert channels I operate, recurring report formats (DMs are never read) | `06` `18` |
-| E | Cloud and SaaS — IAM, resources I own, tools where I am an admin | `12` `13` `16` |
+| C | Jira, Confluence, Linear — everything In Progress / To Do, epics and projects I own or lead, runbook pages | `04` `05` `20` |
+| D | Notion, Slack, Google Docs/Drive, Teams — canonical documents, documents that live only in my own Drive, bots and alert channels I operate, recurring report formats (DMs and private chats are never read) | `06` `18` `21` `22` |
+| E | Cloud, SaaS, on-call — IAM, resources I own, tools where I am an admin, other trackers (Asana, Monday, ClickUp, Azure DevOps, ServiceNow…), Sentry issues assigned to me, PagerDuty/Opsgenie rotations, Datadog/Grafana monitors that alert only me | `12` `13` `16` `23` |
 | F | AI memory — Claude Code auto-memory, rules/skills I wrote, a copy of Codex settings, session metadata | `08`–`11` `15`, `memory-export/` |
 
 After collecting, the agent picks about ten candidates for "things that break when my account is disabled", re-queries each one live (`17-tracked-*`), and writes `handoff.md` and `persona.md` from all of it. Every sentence carries a citation (an appendix file or a URL); guesses are marked `(추정)` (estimate).
@@ -102,7 +102,7 @@ scripts/qa.test.sh                Tests for qa.sh
 <id>/                             id = company email before @ (e.g. jane.doe)
   handoff.md                      Handoff document, sections 0–12
   persona.md                      Design philosophy, judgment criteria, working principles
-  appendix/01–18                  Raw material per source
+  appendix/01–23                  Raw material per source
   memory-export/<original dir>/   Copy of the AI memory originals
   memory-export/_config/          Copy of CLAUDE.md, rules, skills, Codex settings
   inherit/<successor-id>-YYYY-MM-DD.md  Summary written by the successor
@@ -125,12 +125,12 @@ Regex scanning does not catch every secret. See [SECURITY.md](SECURITY.md) (Kore
 - [Claude Code](https://claude.com/claude-code) or Codex CLI
 - `git`, `bash` 3.2+, `python3` (or `node`)
 - [`gh`](https://cli.github.com/) — used for GitHub collection, PR creation, and the public-repo check. Without it those steps become "not collected" or the agent asks you
-- Optional: Jira, Confluence, Notion, Slack MCP; AWS and GCP CLI logins
+- Optional: MCP or CLI for Jira, Confluence, Linear, Notion, Slack, Google Drive, Teams, Sentry, PagerDuty, Datadog/Grafana; `glab` for GitLab; AWS, GCP, Azure CLI logins. Anything missing is marked "not collected" with manual-check instructions
 
 ## Limitations
 
 - Prompts and generated documents are in Korean.
-- Built around GitHub (org repos, PRs, Actions).
+- The vault repo itself must be on GitHub (PRs, Actions, `gh`). GitLab is supported as a source to collect from, not as a host for the vault.
 - IDs must match `^[a-z0-9]+(\.[a-z0-9]+)*$`. If the email local part has underscores, hyphens, or capitals, the agent stops and asks for an ID.
 - Only one company domain can be configured.
 - The phone-number pattern in `qa.sh` covers Korean mobile numbers only.
