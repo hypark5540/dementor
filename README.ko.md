@@ -57,11 +57,11 @@
 
 | 수집기 | 소스 | 산출물 (`<id>/appendix/`) |
 |---|---|---|
-| A | GitHub — 내 PR 전수, 열린 PR, 레포 권한, 유일 admin 레포, 워크플로·시크릿 이름 | `01` `02` |
+| A | GitHub·GitLab — 내 PR/MR 전수, 열린 것, 레포·그룹 권한, 유일 admin/Owner 레포, 워크플로·CI 변수·시크릿 이름 | `01` `02` `19` |
 | B | 로컬 레포·머신·문서 — 미push 커밋, stash, 클라우드 프로파일, 스케줄러, CLI 설정 | `03` `07` `14` |
-| C | Jira·Confluence — 진행 중·To Do 전량, 소유 Epic, 런북 페이지 | `04` `05` |
-| D | Notion·Slack — 정본 문서, 운영하는 봇·알림 채널, 반복 보고 포맷(DM 은 조회하지 않음) | `06` `18` |
-| E | 클라우드·SaaS — IAM, 내가 owner 인 리소스, 관리자 권한 도구 | `12` `13` `16` |
+| C | Jira·Confluence·Linear — 진행 중·To Do 전량, 소유·lead 인 Epic·프로젝트, 런북 페이지 | `04` `05` `20` |
+| D | Notion·Slack·Google Docs/Drive·Teams — 정본 문서, 내 드라이브에만 있는 문서, 운영하는 봇·알림 채널, 반복 보고 포맷(DM·개인 채팅은 조회하지 않음) | `06` `18` `21` `22` |
+| E | 클라우드·SaaS·온콜 — IAM, 내가 owner 인 리소스, 관리자 권한 도구, 기타 작업 추적 도구(Asana·Monday·ClickUp·Azure DevOps·ServiceNow…), 내게 배정된 Sentry 이슈, PagerDuty/Opsgenie 로테이션, 나에게만 알람이 가는 Datadog/Grafana 모니터 | `12` `13` `16` `23` |
 | F | AI 메모리 — Claude Code 자동 메모리·직접 쓴 rules/skills·Codex 설정 사본, 세션 메타 | `08`~`11` `15`, `memory-export/` |
 
 수집 뒤에는 "내 계정이 꺼지면 깨지는 것" 후보 10개 안팎을 지금 시각에 다시 조회해 확인하고(`17-tracked-*`), 이를 합쳐 `handoff.md` 와 `persona.md` 를 쓴다. 모든 문장에 근거(appendix 파일이나 URL)가 붙고, 추정은 `(추정)` 으로 표시된다.
@@ -100,7 +100,7 @@ scripts/qa.test.sh                qa.sh 테스트
 <id>/                             id = 회사 이메일 @ 앞부분 (예: jane.doe)
   handoff.md                      인수인계 본문 0~12절
   persona.md                      설계 철학·판단 기준·작업 원칙
-  appendix/01~18                  소스별 수집 원자료
+  appendix/01~23                  소스별 수집 원자료
   memory-export/<원본 디렉터리명>/  AI 메모리 원본 사본
   memory-export/_config/          CLAUDE.md·rules·skills·Codex 설정 사본
   inherit/<인계자id>-YYYY-MM-DD.md 인계자가 만든 요약
@@ -123,12 +123,12 @@ scripts/qa.test.sh                qa.sh 테스트
 - [Claude Code](https://claude.com/claude-code) 또는 Codex CLI
 - `git`, `bash` 3.2 이상, `python3`(없으면 `node`)
 - [`gh`](https://cli.github.com/) — GitHub 수집, PR 생성, 공개 여부 확인에 쓴다. 없으면 해당 단계가 "미수집" 이 되거나 사용자에게 묻는다
-- 선택: Jira·Confluence·Notion·Slack MCP, AWS·GCP CLI 로그인
+- 선택: Jira·Confluence·Linear·Notion·Slack·Google Drive·Teams·Sentry·PagerDuty·Datadog/Grafana 의 MCP 나 CLI, GitLab 은 `glab`, AWS·GCP·Azure CLI 로그인. 없는 것은 "미수집" 과 수동 확인 방법으로 남는다
 
 ## 한계
 
 - 프롬프트와 산출물이 한국어다.
-- GitHub 기준이다(org 레포, PR, Actions).
+- 보관소 레포 자체는 GitHub 여야 한다(PR, Actions, `gh`). GitLab 은 수집 소스로 지원하고 보관소 호스트로는 지원하지 않는다.
 - ID 는 `^[a-z0-9]+(\.[a-z0-9]+)*$` 만 받는다. 이메일 앞부분에 밑줄·하이픈·대문자가 있으면 에이전트가 멈추고 ID 를 묻는다.
 - 회사 도메인은 하나만 설정할 수 있다.
 - `qa.sh` 의 전화번호 패턴은 한국 휴대폰 형식뿐이다.
