@@ -85,7 +85,7 @@ The summary is ordered "what can break right now → unfinished work → recurri
 
 Check that the PR's CI (`qa`) passed, skim the contents, and merge.
 On FAIL, look at the flagged file and ask the author to fix it. Never push to `main` directly.
-While skimming, check that `persona.md` and `memory-export/` do not contain sentences that instruct an agent to run something — the successor's agent will read those files.
+While skimming, check that `persona.md` and `memory-export/` do not contain sentences that instruct an agent to run something — the successor's agent will read those files. Also skim `appendix/18-slack.md` and `22-teams.md`: the DM extracts there must hold work decisions only, no quoted private conversation and no secret values.
 
 ## Layout
 
@@ -113,7 +113,7 @@ scripts/qa.test.sh                Tests for qa.sh
 - **Read-only collection**: the procedures only instruct queries. The only places written are your own `<id>/` folder in the repo and the successor's own memory.
 - **Public-repo guard**: before collection starts and right before pushing, the agent checks whether the repo is public and stops if it is.
 - **Secret values are never recorded**: only names, paths, and expiry dates. Settings and token files are deleted right after copying, and `.gitignore` blocks them once more.
-- **DMs are extracted, not copied**: work happens in DMs too, so they are read — but only decisions, promises, and tacit rules come out, each cited with date, counterpart, and link, quotes capped at one line. Private conversations (family, health, pay, HR, job search) and the counterpart's personal details never appear; only per-person counts of excluded messages.
+- **DMs are extracted, not copied**: work happens in DMs too, so they are read — but only decisions, promises, and tacit rules come out, each cited with date, counterpart, and link, quotes capped at one line. Private conversations (family, health, pay, HR, job search) and the counterpart's personal details never appear; only one total count of excluded messages (never per person). Raw DM dumps are not kept on local disk either.
 - **Private information excluded**: personal projects, family, and career memories are not collected; only the count of excluded items is kept.
 - **Two QA gates**: `scripts/qa.sh` scans for secret and phone-number patterns before committing (locally) and on the PR (CI). A single hit is a FAIL.
 - **PR gate**: packages go up only on `soul/<id>` branches, inherit summaries only on `inherit/<me>-<id>`.

@@ -74,6 +74,18 @@ check "GitHub OAuth 토큰(gho_)은 FAIL" 1 '^시크릿 패턴: 1건$' jane.doe
 pkg jane.doe; echo 'api_key: abcdefghijklmnop==' >> "$T/jane.doe/handoff.md"
 check "api_key 값(base64 패딩 포함)은 FAIL" 1 '^시크릿 패턴: 1건$' jane.doe
 
+pkg jane.doe; echo "https://oauth2:glpat-""ABCDEFGHIJKLMNOPQRST@gitlab.example.com/g/r.git" >> "$T/jane.doe/appendix/01-github-prs.md"
+check "GitLab PAT(URL 안)는 FAIL" 1 '^시크릿 패턴: 1건$' jane.doe
+
+pkg jane.doe; echo "xapp-""1-A0B1C2D3E4F-1234567890-abcdef0123456789" >> "$T/jane.doe/handoff.md"
+check "Slack app-level 토큰(xapp-)은 FAIL" 1 '^시크릿 패턴: 1건$' jane.doe
+
+pkg jane.doe; echo "lin_api_""abcdefghijklmnopqrstuvwxyz0123456789" >> "$T/jane.doe/handoff.md"
+check "Linear API 키(lin_api_)는 FAIL" 1 '^시크릿 패턴: 1건$' jane.doe
+
+pkg jane.doe; echo 'global-configuration-manager and glpat-short' >> "$T/jane.doe/handoff.md"
+check "gl- 로 시작하는 일반 단어는 PASS" 0 '^QA: PASS$' jane.doe
+
 pkg jane.doe; echo 'owner a@acme.com, vendor b@gmail.com' >> "$T/jane.doe/handoff.md"
 check "회사 도메인(.dementorrc) 이메일은 외부로 세지 않는다" 0 '밖 이메일\(정보성\): 1건  도메인: gmail\.com' jane.doe
 
