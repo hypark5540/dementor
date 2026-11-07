@@ -2,7 +2,7 @@
 
 실행 주체·시점: 인계자가 **dementor 클론 루트**에서 전임자 폴더가 머지된 뒤 실행한다(Claude 는 `/dementor-inherit <id>`, Codex 는 이 파일을 읽혀 수행).
 인자: 첫 인자 = 전임자 `<id>`(회사 이메일 @ 앞부분, 예: `jane.doe`). 아래에서 `<id>` 는 전임자, `<me>` 는 인계자 id 다.
-소요: 10~20분(매핑에서 묻는 횟수에 따라 다름). 쓰는 파일은 `<id>/inherit/<me>-YYYY-MM-DD.md` 와 내 메모리 디렉터리의 `MEMORY.md`(Codex 경로는 `$CODEX_HOME/AGENTS.md`, 기본 `~/.codex/AGENTS.md`), 그리고 `/tmp/dementor-*` 임시 파일뿐이다.
+소요: 10~20분(매핑에서 묻는 횟수에 따라 다름). 쓰는 파일은 `<id>/inherit/<me>-YYYY-MM-DD.md` 와 내 메모리 디렉터리의 `MEMORY.md`(Codex 경로는 `$CODEX_HOME/AGENTS.md`, 기본 `~/.codex/AGENTS.md`), 그리고 레포 루트 아래 `.dementor-work/`(`.gitignore` 됨) 작업 파일뿐이다.
 
 안전 규칙(공통): 수집은 read-only. `git fetch`·네트워크 호출 금지. 시크릿 값·토큰·개인 연락처를 어떤 파일에도 쓰지 않는다. 사적 DM·개인 프로젝트·가족·커리어 관련 메모리는 제외한다(요약과 6단계 사본에 옮기지 않고, 인계자 머신의 비회사 레포는 짝 후보에서 뺀다). 전임자 원본(`<id>/memory-export/`, `<id>/handoff.md`, `<id>/appendix/`)은 수정하지 않는다. `<id>/` 안에서 내가 쓰는 파일은 `inherit/` 아래 내 요약 파일 하나뿐이다. `main` 에 직접 푸시하지 않는다. 지어내지 않고 모든 항목에 원문 경로 근거를 단다. 확신이 없으면 `(확인 필요)` 로 적는다.
 
@@ -17,9 +17,9 @@
   1. **내가 Claude Code 세션**(시스템 프롬프트가 Claude Code 의 것이고 `CLAUDECODE` 환경변수가 있음)이고 시스템 프롬프트에 persistent file-based memory 경로(`.../<slug>/memory/` 꼴)가 있으면 **Claude 자동 메모리 경로** — 4·5·6단계를 수행한다. Claude 세션은 `$CODEX_HOME` 디렉터리가 있어도 Codex 경로로 가지 않는다(Orca 등은 Claude 세션에도 `CODEX_HOME` 을 넣어 둔다).
   2. **내가 Codex 세션**이고 `CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"; [ -d "$CODEX_HOME" ]` 이면 **Codex 경로** — 4단계 대신 `$CODEX_HOME/AGENTS.md` 끝에 상속 절(요약 파일 한 줄)을 붙인다. 5단계의 표 보고는 수행하되(포인터 = AGENTS.md 절 1개) 복사 제안 고정 문구와 6단계는 생략한다.
   3. 그 외(메모리 경로가 없는 Claude 세션 = 자동 메모리 꺼짐·서브에이전트, 또는 Codex 인데 `$CODEX_HOME` 디렉터리 없음)는 1~3단계와 요약 파일 커밋까지만 하고 "포인터를 심을 메모리 위치를 찾지 못했습니다. 메모리 루트 경로를 알려주세요(`~/.claude/projects` 가 있으면 그것인지 확인)" 라고 묻고 멈춘다. 사용자가 `<root>` 를 주면 Claude 경로로 계속하되 요약 §0 과 5단계 보고에 `(확인 필요)` 를 단다. `$CODEX_HOME`·`~/.claude/projects` 를 새로 만들지 않는다.
-- **메모리 루트 `<root>` 역산**: 시스템 프롬프트가 알려준 내 메모리 경로 `P` 가 `<root>/<slug>/memory/` 꼴일 때만 `memory/` 의 두 단계 위가 `<root>` 다(`dirname "$(dirname "$P")"`). 이 꼴은 기본 설정에서만 참이다 — `autoMemoryDirectory` 설정 등으로 메모리 디렉터리를 바꾼 머신에서는 `<slug>/memory` 가 붙지 않는 **평평한 경로**가 오고, 그때 `dirname` 역산은 엉뚱한 상위 폴더가 된다(4단계가 그 아래에 Claude 가 읽지 않는 `MEMORY.md` 를 만든다). 그래서 역산 전에 모양을 검증한다 — 이 절차는 dementor 루트 `$ROOT` 에서 실행되므로 세션의 메모리 경로는 `slug "$ROOT"` 아래여야 한다(`slug` 는 아래 함수, `$ROOT` 는 1단계). 이 블록은 1단계 1 이 `/tmp/dementor-env.sh` 를 만든 뒤, 4단계 1 에서 실행한다:
+- **메모리 루트 `<root>` 역산**: 시스템 프롬프트가 알려준 내 메모리 경로 `P` 가 `<root>/<slug>/memory/` 꼴일 때만 `memory/` 의 두 단계 위가 `<root>` 다(`dirname "$(dirname "$P")"`). 이 꼴은 기본 설정에서만 참이다 — `autoMemoryDirectory` 설정 등으로 메모리 디렉터리를 바꾼 머신에서는 `<slug>/memory` 가 붙지 않는 **평평한 경로**가 오고, 그때 `dirname` 역산은 엉뚱한 상위 폴더가 된다(4단계가 그 아래에 Claude 가 읽지 않는 `MEMORY.md` 를 만든다). 그래서 역산 전에 모양을 검증한다 — 이 절차는 dementor 루트 `$ROOT` 에서 실행되므로 세션의 메모리 경로는 `slug "$ROOT"` 아래여야 한다(`slug` 는 아래 함수, `$ROOT` 는 1단계). 이 블록은 1단계 1 이 `.dementor-work/env.sh` 를 만든 뒤, 4단계 1 에서 실행한다:
   ```bash
-  . /tmp/dementor-env.sh; P=<시스템 프롬프트의 메모리 경로>; P=${P%/}
+  . "$(git rev-parse --show-toplevel)/.dementor-work/env.sh"; P='<시스템 프롬프트의 메모리 경로>'; P=${P%/}
   [ "$(basename "$P")" = memory ] && [ "$(basename "$(dirname "$P")")" = "$(slug "$ROOT")" ] && echo "<root>=$(dirname "$(dirname "$P")")" || echo "메모리 경로가 <root>/<slug>/memory/ 꼴이 아님(커스텀 autoMemoryDirectory?)"
   ```
   두 가지 실패를 구분한다. (1) `basename "$P"` 가 `memory` 인데 부모 슬러그가 `slug "$ROOT"` 와 다르면 레이아웃은 표준이고 **세션이 dementor 루트에서 시작되지 않은 것**(하위 폴더 또는 심링크 경로)이다 — 평평한 경로로 취급하지 말고 "dementor 클론 루트에서 세션을 다시 시작하세요" 라고 멈춘다. (2) `basename "$P"` 가 `memory` 가 아닐 때만 **커스텀 메모리 디렉터리(평평한 경로)** 로 본다: `<root>` 를 역산하지 않고, 4단계 5(dementor 자체 절)는 그 디렉터리 `$P/MEMORY.md` 에 붙이며, 레포별 포인터(4단계 1~4)는 세션 판별 3 처럼 `<root>` 를 사용자에게 묻고 `(확인 필요)` 를 단다(사용자가 모르면 레포별 포인터는 생략하고 5단계 보고에 적는다). `~/.claude/projects` 가 아닐 수 있다(별도 프로필 등). **하드코딩 금지**.
@@ -27,16 +27,17 @@
   ```bash
   slug() { python3 -c 'import re,sys; print(re.sub(r"[^A-Za-z0-9]", "-", sys.argv[1]))' "$1"; }   # python3 이 없으면 node -e 'console.log(process.argv[1].replace(/[^A-Za-z0-9]/g,"-"))' "$1"
   ```
-  이 정의는 1단계 1 의 `/tmp/dementor-env.sh` 에 넣어 두고 모든 코드 블록 첫 줄에서 읽어 들인다(셸 함수·변수는 도구 호출 사이에 유지되지 않는다).
+  이 정의는 1단계 1 의 `.dementor-work/env.sh` 에 넣어 두고 모든 코드 블록 첫 줄에서 읽어 들인다(셸 함수·변수는 도구 호출 사이에 유지되지 않는다).
 - **메모리 디렉터리 찾기(기존 디렉터리 우선)**: 레포 `R` 의 내 메모리 디렉터리는 순서대로 — (1) `S=$(slug "$R")`; `[ -d "<root>/$S" ]` 이면 그것(정확 일치). (2) 없고 `R` 이 ASCII 만이면(`printf '%s' "$R" | LC_ALL=C grep -q '[^ -~]'` 가 실패) `mkdir -p "<root>/$S/memory"`. (3) `R` 에 비ASCII 가 있으면 **만들지 않는다**: `B=$(slug "$(basename "$R")")`, `PB=$(slug "$(basename "$(dirname "$R")")")` 로 `ls <root> | grep -- "-${B}\$"` 후보를 뽑아, 정확히 하나이고 `-${PB}-${B}` 로 끝나면 그것을 쓰되 `(확인 필요)` 를 달고, 아니면 후보를 보여 주고 묻는다. 꼬리만 같은 다른 프로젝트(예: `~/code/agents` 에 `...-acme-agents`)를 자동 채택하지 않기 위해서다.
 
 ## 1단계 — 위치 확인과 읽기
 
 1. 위치와 전제: `ROOT=$PWD` 로 두고 `[ "$(pwd -P)" = "$(git rev-parse --show-toplevel)" ] && [ -f "$ROOT/AGENTS.md" ]` 여야 한다(현재 디렉터리가 곧 클론 루트. `$ROOT` 는 논리 경로를 유지해야 Claude 메모리 슬러그와 맞는다). 아니면 "dementor 클론 루트에서 실행하세요" 라고 멈춘다. 이어서 `git rev-parse --verify -q main >/dev/null && git cat-file -e "main:<id>/handoff.md" 2>/dev/null` 이 아니면 "전임자 폴더가 `main` 에 머지된 뒤 실행하세요(현재 `main` 없음 또는 `<id>/` 미커밋)" 라고 멈춘다.
-   셸 변수와 함수는 도구 호출 사이에 유지되지 않는다. 아래 네 줄을 `/tmp/dementor-env.sh` 로 저장하고(Write 도구로 만든다, `<id>` 와 `<클론 루트 절대경로>` 는 실측값), **이후 모든 코드 블록 첫 줄에서 `. /tmp/dementor-env.sh` 로 읽어 들인다**:
+   셸 변수와 함수는 도구 호출 사이에 유지되지 않는다. 먼저 `W="$(git rev-parse --show-toplevel)/.dementor-work"; rm -rf "$W"; mkdir -p "$W"` 로 작업 폴더를 비워 만든다(이전 실행의 잔여 파일이 3단계 매핑에 섞이지 않게). 아래 다섯 줄을 `$W/env.sh` 로 저장하고(Write 도구로 만든다, `<id>` 와 `<클론 루트 절대경로>` 는 실측값), **이후 모든 코드 블록 첫 줄에서 `. "$(git rev-parse --show-toplevel)/.dementor-work/env.sh"` 로 읽어 들인다**:
    ```bash
-   ID=<id>
-   ROOT=<클론 루트 절대경로>
+   ID='<id>'
+   ROOT='<클론 루트 절대경로>'
+   W="$ROOT/.dementor-work"
    CODEX_HOME="${CODEX_HOME:-$HOME/.codex}"
    slug() { python3 -c 'import re,sys; print(re.sub(r"[^A-Za-z0-9]", "-", sys.argv[1]))' "$1"; }
    ```
@@ -75,36 +76,36 @@
 디렉터리명은 전임자 머신의 절대경로 slug 다(예: `-Users-janedoe-Documents-main-02-code-acme-data-pipeline`). 사람 이름·상위 폴더가 다르므로 **꼬리**로만 맞춘다. 먼저 두 목록을 만든다(`git fetch` 금지, config 읽기만).
 
 ```bash
-. /tmp/dementor-env.sh
-ls -d "$ROOT/$ID"/memory-export/*/MEMORY.md | xargs -n1 dirname | xargs -n1 basename > /tmp/dementor-dirs.txt   # 색인 있는 디렉터리만
+. "$(git rev-parse --show-toplevel)/.dementor-work/env.sh"
+ls -d "$ROOT/$ID"/memory-export/*/MEMORY.md | xargs -n1 dirname | xargs -n1 basename > "$W/dirs.txt"   # 색인 있는 디렉터리만
 find ~ -maxdepth 5 -name .git -not -path '*/node_modules/*' -not -path '*/.Trash/*' 2>/dev/null \
-  | while read -r g; do r=$(dirname "$g"); printf '%s\t%s\n' "$r" "$(git -C "$r" config --get remote.origin.url)"; done > /tmp/local-repos.all.tsv
+  | while read -r g; do r=$(dirname "$g"); printf '%s\t%s\n' "$r" "$(git -C "$r" config --get remote.origin.url)"; done > "$W/local-repos.all.tsv"
 # 회사 레포만 후보로 남긴다(개인 프로젝트 제외). ORG = dementor 자체 origin 의 org. 03 의 origin 열에 다른 회사 org 가 더 있으면 그 org 행도 같은 식으로 추가한다.
 ORG=$(git -C "$ROOT" config --get remote.origin.url | sed -E 's#\.git$##; s#.*[:/]([^/]+)/[^/]+$#\1#')
-awk -F'\t' -v o="$ORG" 'index($2, ":" o "/") || index($2, "/" o "/")' /tmp/local-repos.all.tsv > /tmp/local-repos.tsv
-awk -F'\t' '$2 == ""' /tmp/local-repos.all.tsv   # origin 없는 레포 — 목록을 보여 주고 회사 레포인지 묻는다. 사용자가 지목한 행만 /tmp/local-repos.tsv 에 덧붙인다. 그 밖(다른 org·개인 계정)은 후보에서 뺀다.
+awk -F'\t' -v o="$ORG" 'index($2, ":" o "/") || index($2, "/" o "/")' "$W/local-repos.all.tsv" > "$W/local-repos.tsv"
+awk -F'\t' '$2 == ""' "$W/local-repos.all.tsv"   # origin 없는 레포 — 목록을 보여 주고 회사 레포인지 묻는다. 사용자가 지목한 행만 "$W/local-repos.tsv" 에 덧붙인다. 그 밖(다른 org·개인 계정)은 후보에서 뺀다.
 ```
 
 폴백 순서(앞에서 맞으면 뒤로 가지 않는다):
 
 - **(a) origin 으로** — 03 에 경로별 origin 열이 있을 때. 03 행의 경로 → slug 꼬리로 전임자 디렉터리를 찾고, 같은 행의 origin 과 인계자 레포 origin(`org/repo` 로 정규화)이 같으면 짝.
   ```bash
-  . /tmp/dementor-env.sh
-  grep -E '^\| [0-9]+ \|' "$ROOT/$ID/appendix/03-local-repos.md" | awk -F'|' '{gsub(/[`🔴 ]/,"",$3); gsub(/ /,"",$5); print $3"\t"$5}' > /tmp/pred-origins.tsv   # 경로<TAB>org/repo
-  awk -F'\t' '{u=$2; sub(/\.git$/,"",u); n=split(u,a,/[:\/]/); print $1"\t"a[n-1]"/"a[n]}' /tmp/local-repos.tsv > /tmp/local-origins.tsv   # 경로<TAB>org/repo
-  # 03 경로 P 의 slug: S=$(slug "$P"); grep -- "-${S}\$" /tmp/dementor-dirs.txt      # slug 는 0 의 함수
+  . "$(git rev-parse --show-toplevel)/.dementor-work/env.sh"
+  grep -E '^\| [0-9]+ \|' "$ROOT/$ID/appendix/03-local-repos.md" | awk -F'|' '{gsub(/[`🔴 ]/,"",$3); gsub(/ /,"",$5); print $3"\t"$5}' > "$W/pred-origins.tsv"   # 경로<TAB>org/repo
+  awk -F'\t' '{u=$2; sub(/\.git$/,"",u); n=split(u,a,/[:\/]/); print $1"\t"a[n-1]"/"a[n]}' "$W/local-repos.tsv" > "$W/local-origins.tsv"   # 경로<TAB>org/repo
+  # 03 경로 P 의 slug: S=$(slug "$P"); grep -- "-${S}\$" "$W/dirs.txt"      # slug 는 0 의 함수
   ```
   org/repo 가 같은 인계자 레포가 여럿(클론 2개·워크트리)이면 묻는다. 원격 URL 이 로컬 경로인 행(예: `../acme-sales-platform`)은 (b) 로 넘긴다.
 - **(b) 디렉터리명 꼬리 ↔ 로컬 레포 basename** — 03 에 origin 이 없거나 (a) 에서 못 맞춘 디렉터리.
   ```bash
-  . /tmp/dementor-env.sh
-  grep -E '^\| [0-9]+ \|' "$ROOT/$ID/appendix/03-local-repos.md" | awk -F'|' '{gsub(/[`🔴 ]/,"",$3); n=split($3,a,"/"); print a[n]}' | while read -r p; do slug "$p"; done | sort -u > /tmp/pred-basenames.txt   # 전임자 레포 basename 의 slug 집합(경로 열은 origin 열이 없어도 있다; 03 표가 없으면 빈 파일)
-  while IFS=$'\t' read -r r o; do b=$(slug "$(basename "$r")"); grep -- "-${b}\$" /tmp/dementor-dirs.txt | sed "s|^|$r	|"; done < /tmp/local-repos.tsv
+  . "$(git rev-parse --show-toplevel)/.dementor-work/env.sh"
+  grep -E '^\| [0-9]+ \|' "$ROOT/$ID/appendix/03-local-repos.md" | awk -F'|' '{gsub(/[`🔴 ]/,"",$3); n=split($3,a,"/"); print a[n]}' | while read -r p; do slug "$p"; done | sort -u > "$W/pred-basenames.txt"   # 전임자 레포 basename 의 slug 집합(경로 열은 origin 열이 없어도 있다; 03 표가 없으면 빈 파일)
+  while IFS=$'\t' read -r r o; do b=$(slug "$(basename "$r")"); grep -- "-${b}\$" "$W/dirs.txt" | sed "s|^|$r	|"; done < "$W/local-repos.tsv"
   ```
-  꼬리 일치는 **후보**일 뿐이다 — slug 가 `/` 도 하이픈으로 바꿔 레포 이름 경계가 사라지므로, `~/agents` 는 `...-acme-agents` 에, `~/redash` 는 `...-data-redash` 에, `~/api` 는 `...-shop-admin-api` 에 맞는다. 후보 `r`(basename slug `b`) ↔ `D` 를 **자동 짝으로 치는 조건**은 둘 중 하나다: (i) `grep -qxF "$b" /tmp/pred-basenames.txt` — 전임자도 같은 basename 의 레포를 가졌다. (ii) 남는 앞부분 `${D%-$b}` 가 이미 확정된 다른 짝의 앞부분과 같다(공통 상위 폴더, 예: `-Users-janedoe-Documents-main-02-code`). 이를 위해 짝이 확정될 때마다 앞부분을 모아 둔다: (a) 는 `echo "${D%-$(slug "$P")}"`, (b) 는 `echo "${D%-$b}"` 를 `/tmp/pred-prefixes.txt` 에 추가하고, (ii) 는 `grep -qxF "${D%-$b}" /tmp/pred-prefixes.txt` 로 본다. 둘 다 아니면 자동으로 짝짓지 않고 후보를 보여 주고 묻는다. 한 디렉터리에 후보 레포가 여럿이어도 묻는다. basename 이 `default` `workdir` `workspace` `main` `wt` `src` 처럼 범용 단어 하나뿐인 레포는 짝으로 치지 않는다.
-  **두 번째 패스(레포 하위 폴더 세션)**: (a)·(b) 로 짝이 맞은 디렉터리 `D` ↔ 레포 `R` 마다 `grep -- "^${D}-" /tmp/dementor-dirs.txt` 로 `D-<꼬리>` 꼴 디렉터리를 찾는다(예: `...-acme-agents` 에 대한 `...-acme-agents-billing-agent` — 레포 하위 폴더에서 띄운 세션의 메모리). 꼬리 `T` 에 대응하는 하위 폴더 후보는 글자 그대로 `R/<T>` 를 보지 않고(하이픈이 `/`·`_`·`.` 어느 것이었는지 모른다 — 실데이터: `billing-agent` 의 실제 폴더는 `billing_agent`) 상대경로의 slug 로 구한다:
+  꼬리 일치는 **후보**일 뿐이다 — slug 가 `/` 도 하이픈으로 바꿔 레포 이름 경계가 사라지므로, `~/agents` 는 `...-acme-agents` 에, `~/redash` 는 `...-data-redash` 에, `~/api` 는 `...-shop-admin-api` 에 맞는다. 후보 `r`(basename slug `b`) ↔ `D` 를 **자동 짝으로 치는 조건**은 둘 중 하나다: (i) `grep -qxF "$b" "$W/pred-basenames.txt"` — 전임자도 같은 basename 의 레포를 가졌다. (ii) 남는 앞부분 `${D%-$b}` 가 이미 확정된 다른 짝의 앞부분과 같다(공통 상위 폴더, 예: `-Users-janedoe-Documents-main-02-code`). 이를 위해 짝이 확정될 때마다 앞부분을 모아 둔다: (a) 는 `echo "${D%-$(slug "$P")}"`, (b) 는 `echo "${D%-$b}"` 를 `"$W/pred-prefixes.txt"` 에 추가하고, (ii) 는 `grep -qxF "${D%-$b}" "$W/pred-prefixes.txt"` 로 본다. 둘 다 아니면 자동으로 짝짓지 않고 후보를 보여 주고 묻는다. 한 디렉터리에 후보 레포가 여럿이어도 묻는다. basename 이 `default` `workdir` `workspace` `main` `wt` `src` 처럼 범용 단어 하나뿐인 레포는 짝으로 치지 않는다.
+  **두 번째 패스(레포 하위 폴더 세션)**: (a)·(b) 로 짝이 맞은 디렉터리 `D` ↔ 레포 `R` 마다 `grep -- "^${D}-" "$W/dirs.txt"` 로 `D-<꼬리>` 꼴 디렉터리를 찾는다(예: `...-acme-agents` 에 대한 `...-acme-agents-billing-agent` — 레포 하위 폴더에서 띄운 세션의 메모리). 꼬리 `T` 에 대응하는 하위 폴더 후보는 글자 그대로 `R/<T>` 를 보지 않고(하이픈이 `/`·`_`·`.` 어느 것이었는지 모른다 — 실데이터: `billing-agent` 의 실제 폴더는 `billing_agent`) 상대경로의 slug 로 구한다:
   ```bash
-  . /tmp/dementor-env.sh; R=<레포 절대경로>; T=<꼬리>; find "$R" -mindepth 1 -maxdepth 2 -type d -not -path '*/.git/*' -not -path '*/node_modules/*' | while read -r d; do [ "$(slug "${d#$R/}")" = "$T" ] && echo "$d"; done
+  . "$(git rev-parse --show-toplevel)/.dementor-work/env.sh"; R='<레포 절대경로>'; T='<꼬리>'; find "$R" -mindepth 1 -maxdepth 2 -type d -not -path '*/.git/*' -not -path '*/node_modules/*' | while read -r d; do [ "$(slug "${d#$R/}")" = "$T" ] && echo "$d"; done
   ```
   후보가 정확히 1개면 같은 레포 `R` 의 **추가 디렉터리**로 짝(4단계에서 원문 색인 줄이 하나 더 붙는다)으로 치되 `(확인 필요)` 를 달고, 0개면 (c) 로 보내고, 2개 이상이면 후보를 보여 주고 묻는다 — 0 의 메모리 디렉터리 찾기 (3) 과 같은 규칙이다.
 - **(c) 못 맞춘 디렉터리** — UUID 기반 `paperclip-instances-*`, `multica-workspaces-*`, `obsd-*`, 홈 루트(`-Users-<이름>`), 비ASCII 경로 류가 대부분이다. 짝을 지어내지 말고 §7 에 디렉터리명·파일 수·feedback 수와 함께 목록으로 남긴다.
