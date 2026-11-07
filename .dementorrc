@@ -1,0 +1,4 @@
+# dementor 설정. 템플릿으로 비공개 레포를 만든 뒤 회사 이메일 도메인으로 바꾸고 main 에 커밋한다.
+# 값만 쓴다(따옴표·인라인 주석·공백 없이). 예: COMPANY_DOMAIN=acme.com
+# 이 값이 example.com 이면 업로드·인계 절차는 0단계에서 멈춘다.
+COMPANY_DOMAIN=example.com
