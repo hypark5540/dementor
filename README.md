@@ -62,7 +62,7 @@ What the agent collects:
 | A | GitHub, GitLab — every PR/MR of mine, open ones, repo and group permissions, repos where I am the only admin/Owner, workflow, CI variable and secret *names* | `01` `02` `19` |
 | B | Local repos, machine, documents — unpushed commits, stashes, cloud profiles, schedulers, CLI configuration | `03` `07` `14` |
 | C | Jira, Confluence, Linear — everything In Progress / To Do, epics and projects I own or lead, runbook pages | `04` `05` `20` |
-| D | Notion, Slack, Google Docs/Drive, Teams — canonical documents, documents that live only in my own Drive, bots and alert channels I operate, recurring report formats (DMs and private chats are never read) | `06` `18` `21` `22` |
+| D | Notion, Slack, Google Docs/Drive, Teams — canonical documents, documents that live only in my own Drive, bots and alert channels I operate, recurring report formats, and DMs — mined for work decisions, promises, and tacit knowledge as cited items, never copied verbatim; private conversations are excluded | `06` `18` `21` `22` |
 | E | Cloud, SaaS, on-call — IAM, resources I own, tools where I am an admin, other trackers (Asana, Monday, ClickUp, Azure DevOps, ServiceNow…), Sentry issues assigned to me, PagerDuty/Opsgenie rotations, Datadog/Grafana monitors that alert only me | `12` `13` `16` `23` |
 | F | AI memory — Claude Code auto-memory, rules/skills I wrote, a copy of Codex settings, session metadata | `08`–`11` `15`, `memory-export/` |
 
@@ -113,7 +113,8 @@ scripts/qa.test.sh                Tests for qa.sh
 - **Read-only collection**: the procedures only instruct queries. The only places written are your own `<id>/` folder in the repo and the successor's own memory.
 - **Public-repo guard**: before collection starts and right before pushing, the agent checks whether the repo is public and stops if it is.
 - **Secret values are never recorded**: only names, paths, and expiry dates. Settings and token files are deleted right after copying, and `.gitignore` blocks them once more.
-- **Private information excluded**: private DMs, personal projects, family, and career memories are not collected; only the count of excluded items is kept.
+- **DMs are extracted, not copied**: work happens in DMs too, so they are read — but only decisions, promises, and tacit rules come out, each cited with date, counterpart, and link, quotes capped at one line. Private conversations (family, health, pay, HR, job search) and the counterpart's personal details never appear; only per-person counts of excluded messages.
+- **Private information excluded**: personal projects, family, and career memories are not collected; only the count of excluded items is kept.
 - **Two QA gates**: `scripts/qa.sh` scans for secret and phone-number patterns before committing (locally) and on the PR (CI). A single hit is a FAIL.
 - **PR gate**: packages go up only on `soul/<id>` branches, inherit summaries only on `inherit/<me>-<id>`.
 - **No invention**: nothing is written without evidence; anything uncertain is marked `(확인 필요)` (needs confirmation).
