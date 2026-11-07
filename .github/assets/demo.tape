@@ -1,4 +1,4 @@
-# README 데모 GIF. 레포 루트에서 `vhs .github/assets/demo.tape` (brew install vhs). 각본은 demo.sh 에 있다.
+# README.md 데모 GIF(영어). 레포 루트에서 `vhs .github/assets/demo.tape` (brew install vhs). 각본은 demo.sh 에 있다.
 Output .github/assets/demo.gif
 
 Set Shell bash
@@ -11,9 +11,9 @@ Set Framerate 20
 Set Theme "Catppuccin Mocha"
 
 Hide
-Type "bash .github/assets/demo.sh"
+Type "bash .github/assets/demo.sh en"
 Enter
 Show
 
-Wait+Screen@150s /같은 브랜치에 다시 커밋하세요/
+Wait+Screen@150s /commit again on the same branch/
 Sleep 6s

@@ -22,10 +22,10 @@
 ## 데모
 
 <p align="center">
-  <img src=".github/assets/demo.gif" alt="터미널 데모: /dementor-upload 가 수집·QA·PR 뒤 '퇴사 전에 직접 넘겨야 할 것' 을 출력하고, /dementor-inherit jane.doe 가 요약·포인터 등록 뒤 '전임자에게 지금 확인할 것' 을 출력한다" width="100%">
+  <img src=".github/assets/demo.ko.gif" alt="터미널 데모: /dementor-upload 가 수집·QA·PR 뒤 '퇴사 전에 직접 넘겨야 할 것' 을 출력하고, /dementor-inherit jane.doe 가 요약·포인터 등록 뒤 '전임자에게 지금 확인할 것' 을 출력한다" width="100%">
 </p>
 
-가상의 회사(`acme.com`, 퇴사자 `jane.doe`, 인계자 `j.kim`)로 만든 각본 데모다. 에이전트 출력은 대표 장면만 압축한 것이고, `qa.sh` 실행은 실제다. [`vhs`](https://github.com/charmbracelet/vhs)` .github/assets/demo.tape` 로 다시 만들 수 있고 각본은 `.github/assets/demo.sh` 에 있다.
+가상의 회사(`acme.com`, 퇴사자 `jane.doe`, 인계자 `j.kim`)로 만든 각본 데모다. 에이전트 출력은 대표 장면만 압축한 것이고, `qa.sh` 실행은 실제다. [`vhs`](https://github.com/charmbracelet/vhs)` .github/assets/demo.ko.tape` 로 다시 만들 수 있고 각본은 `.github/assets/demo.sh` 에 있다(영어판 `demo.gif` 는 `demo.tape`).
 
 ## 왜 만들었나
 
