@@ -1,5 +1,5 @@
 <p align="center">
-  <img src=".github/assets/dementor.png" alt="달아나는 사람에게서 업무 맥락과 페르소나를 뽑아내는 dementor" width="100%">
+  <img src=".github/assets/dementor.png" alt="dementor pulling work context and persona out of a person running away" width="100%">
 </p>
 
 # dementor
@@ -12,25 +12,27 @@
 [![Codex](https://img.shields.io/badge/Codex-supported-8A63D2)](AGENTS.md)
 [![bash 3.2+](https://img.shields.io/badge/bash-3.2%2B-4EAA25?logo=gnubash&logoColor=white)](scripts/qa.sh)
 
-퇴사자의 업무 맥락·판단 기준·AI 메모리를 "영혼" 패키지 하나로 뽑아 보관하고, 후임이 한 줄로 이어받게 하는 인수인계 템플릿이다.
-떠나는 사람은 자기 AI 에이전트에게 `/dementor-upload` 한 줄을 입력하고, 이어받는 사람은 `/dementor-inherit <id>` 한 줄을 입력한다.
+**English** · [한국어](README.ko.md)
 
-> **English** — dementor is a template repo for employee offboarding. The leaver's own AI agent (Claude Code or Codex) collects their work context, decision rationale, and AI memory into one reviewed package; the successor's agent links that package into its own memory. See [English quick start](#english-quick-start). Prompts and generated documents are in Korean.
+A handover template for employee offboarding. It pulls a leaver's work context, decision rationale, and AI memory into one "soul" package, and lets the successor take it over with a single line.
+The person leaving types `/dementor-upload` to their own AI agent; the person taking over types `/dementor-inherit <id>`.
 
-## 왜 만들었나
+> Prompts and the generated documents are in Korean. The procedures run fine in any Claude Code or Codex session, but the handoff package comes out in Korean.
 
-인수인계 문서는 쓰는 사람이 기억나는 것만 담긴다. 실제로 받은 인수인계 패키지에서 가장 많이 열어 본 것은 요약 문서가 아니라 전임자의 AI 메모리 원본이었다 — 왜 그렇게 결정했는지, 어디서 사고가 났는지, 무엇을 하지 말라고 했는지가 거기 있었다.
+## Why
 
-그래서 dementor 는 두 가지를 한다.
+Handover documents only contain what the writer happens to remember. In practice, the most-opened part of a handover package was not the summary document but the predecessor's raw AI memory — that is where the "why we decided this", "where it broke", and "never do this again" lived.
 
-- **뽑아낸다**: 퇴사자의 에이전트가 GitHub·로컬 레포·Jira·Confluence·Notion·Slack·클라우드·AI 메모리를 읽기 전용으로 훑어, 근거가 달린 인수인계 문서와 페르소나, 메모리 원본 사본을 만든다.
-- **잇는다**: 후임의 에이전트가 그 패키지를 읽고 요약을 만든 뒤, 후임의 로컬 AI 메모리에 원문을 가리키는 링크를 심는다. 복사가 아니라 포인터가 기본이라 후임의 메모리가 남의 기억으로 덮이지 않는다.
+So dementor does two things.
 
-## 시작하기 (관리자, 한 번만)
+- **Extract**: the leaver's agent reads GitHub, local repos, Jira, Confluence, Notion, Slack, cloud accounts, and AI memory — read-only — and produces a cited handoff document, a persona document, and a copy of the memory originals.
+- **Connect**: the successor's agent reads that package, writes a summary, and plants links to the originals in the successor's own local AI memory. Pointers, not copies, are the default, so the successor's memory is never overwritten with someone else's.
 
-패키지에는 계정 ID·협업 관계·판단 기록이 들어간다. **반드시 비공개 레포에서 쓴다. 이 공개 레포나 그 포크에 패키지를 올리지 않는다**(포크는 공개다).
+## Getting started (admin, once)
 
-1. 이 레포로 회사 org 에 **비공개** 레포를 만든다. GitHub 의 **Use this template → Create a new repository → Private**, 또는:
+A package contains account IDs, collaboration history, and decision records. **Use it only in a private repo. Never push a package to this public repo or to a fork of it** (forks are public).
+
+1. Create a **private** repo in your org from this template — GitHub's **Use this template → Create a new repository → Private**, or:
 
    ```bash
    git clone https://github.com/hypark5540/dementor.git && cd dementor
@@ -38,108 +40,101 @@
    gh repo create <org>/dementor --private --source=. --push
    ```
 
-2. `.dementorrc` 의 `COMPANY_DOMAIN` 을 회사 이메일 도메인으로 바꿔 `main` 에 커밋한다. 폴더 이름(ID)은 회사 이메일의 `@` 앞부분이 된다.
+2. Set `COMPANY_DOMAIN` in `.dementorrc` to your company email domain and commit it to `main`. Folder names (IDs) are the part of the company email before `@`.
 
    ```ini
    COMPANY_DOMAIN=acme.com
    ```
 
-3. `main` 브랜치를 보호한다: PR 필수, 상태 검사 `qa` 필수. 접근 권한은 인수인계 당사자와 관리자로 좁힌다.
+3. Protect `main`: require PRs and the `qa` status check. Limit access to the people involved in handovers and the admins.
 
-## 퇴사자
+## Leaver
 
-1. 회사의 dementor 레포를 클론한다.
-2. 레포 루트에서 Claude Code 나 Codex 를 연다.
-3. 한 줄 입력: `/dementor-upload` 또는 "영혼 업로드".
-4. 1~2시간 뒤 `soul/<id>` 브랜치로 PR 이 열린다. Jira·Confluence·Notion·Slack MCP 가 연결된 회사 계정이면 더 많이 채워지고, 없는 소스는 "미수집" 과 수동 확인 방법이 적힌다.
+1. Clone your company's dementor repo.
+2. Open Claude Code or Codex at the repo root.
+3. Type one line: `/dementor-upload` (Codex: "영혼 업로드").
+4. In 1–2 hours a PR opens on the `soul/<id>` branch. A company account with Jira, Confluence, Notion, or Slack MCP connected fills in more; sources that are unavailable are marked "not collected" with instructions for checking manually.
 
-에이전트가 수집하는 것:
+What the agent collects:
 
-| 수집기 | 소스 | 산출물 (`<id>/appendix/`) |
+| Collector | Source | Output (`<id>/appendix/`) |
 |---|---|---|
-| A | GitHub — 내 PR 전수, 열린 PR, 레포 권한, 유일 admin 레포, 워크플로·시크릿 이름 | `01` `02` |
-| B | 로컬 레포·머신·문서 — 미push 커밋, stash, 클라우드 프로파일, 스케줄러, CLI 설정 | `03` `07` `14` |
-| C | Jira·Confluence — 진행 중·To Do 전량, 소유 Epic, 런북 페이지 | `04` `05` |
-| D | Notion·Slack — 정본 문서, 운영하는 봇·알림 채널, 반복 보고 포맷(DM 은 조회하지 않음) | `06` `18` |
-| E | 클라우드·SaaS — IAM, 내가 owner 인 리소스, 관리자 권한 도구 | `12` `13` `16` |
-| F | AI 메모리 — Claude Code 자동 메모리·직접 쓴 rules/skills·Codex 설정 사본, 세션 메타 | `08`~`11` `15`, `memory-export/` |
+| A | GitHub — every PR of mine, open PRs, repo permissions, repos where I am the only admin, workflow and secret *names* | `01` `02` |
+| B | Local repos, machine, documents — unpushed commits, stashes, cloud profiles, schedulers, CLI configuration | `03` `07` `14` |
+| C | Jira, Confluence — everything In Progress / To Do, epics I own, runbook pages | `04` `05` |
+| D | Notion, Slack — canonical documents, bots and alert channels I operate, recurring report formats (DMs are never read) | `06` `18` |
+| E | Cloud and SaaS — IAM, resources I own, tools where I am an admin | `12` `13` `16` |
+| F | AI memory — Claude Code auto-memory, rules/skills I wrote, a copy of Codex settings, session metadata | `08`–`11` `15`, `memory-export/` |
 
-수집 뒤에는 "내 계정이 꺼지면 깨지는 것" 후보 10개 안팎을 지금 시각에 다시 조회해 확인하고(`17-tracked-*`), 이를 합쳐 `handoff.md` 와 `persona.md` 를 쓴다. 모든 문장에 근거(appendix 파일이나 URL)가 붙고, 추정은 `(추정)` 으로 표시된다.
+After collecting, the agent picks about ten candidates for "things that break when my account is disabled", re-queries each one live (`17-tracked-*`), and writes `handoff.md` and `persona.md` from all of it. Every sentence carries a citation (an appendix file or a URL); guesses are marked `(추정)` (estimate).
 
-시크릿 값·비밀번호·개인 연락처는 패키지에 들어가지 않는다(이름·위치·만료일만). 그래서 절차 끝에 **"퇴사 전에 직접 넘겨야 할 것"** 체크리스트가 터미널과 PR 본문에 나온다 — 키 회전, 유일 admin 레포 양도, 개인 계정으로 도는 자동화 이관 같은 것이다. 퇴사일 전에 인계자와 함께 하나씩 처리한다.
+Secret values, passwords, and personal contact details never go into the package (names, locations, and expiry dates only). That is why the run ends with a **"hand over in person before you leave"** checklist, printed in the terminal and in the PR body — key rotation, transferring sole-admin repos, moving automations that run under your personal account. Work through it with the successor before your last day.
 
-## 인계자
+## Successor
 
-1. 회사의 dementor 레포를 클론한다(이미 있으면 `git pull`).
-2. 레포 루트에서 Claude Code 나 Codex 를 연다.
-3. 한 줄 입력: `/dementor-inherit <전임자id>` 또는 "<전임자id> 인계받을게".
-4. 10~20분 뒤 `<전임자id>/inherit/<내id>-<날짜>.md` 요약이 생기고, 내 로컬 AI 메모리에 전임자 포인터가 붙는다. 원문은 필요할 때만 열면 된다.
+1. Clone your company's dementor repo (`git pull` if you already have it).
+2. Open Claude Code or Codex at the repo root.
+3. Type one line: `/dementor-inherit <predecessor-id>` (Codex: "<predecessor-id> 인계받을게").
+4. In 10–20 minutes a summary appears at `<predecessor-id>/inherit/<your-id>-<date>.md`, and pointers to the predecessor are added to your local AI memory. Open the originals only when you need them.
 
-**전임자의 퇴사일 전에 돌린다.** 절차 끝에 **"전임자에게 지금 확인할 것"** 질문 목록이 나오는데, 시크릿 값과 권한처럼 사람이 넘겨야 하는 것이라 퇴사 후에는 답할 사람이 없다. 답은 요약 파일에 적어 다시 커밋한다.
+**Run it before the predecessor's last day.** The procedure ends with an **"ask the predecessor now"** question list: secret values, permissions, and other things only a person can hand over — nobody can answer them after they are gone. Write the answers into the summary file and commit it again.
 
-요약은 "지금 당장 깨질 수 있는 것 → 미완 작업 → 반복 운영 → 함정·교훈 → 페르소나 핵심" 순서다. 전임자의 메모리 디렉터리와 내 로컬 레포는 origin 으로 짝을 맞추고, 짝이 맞은 레포의 메모리에만 링크 두 줄을 붙인다. 더 깊이 들이고 싶으면 전임자의 feedback 유형 메모리만 `inherited_<id>_` 접두어 사본으로 복사할 수 있고, 명령 두 줄로 되돌릴 수 있다.
+The summary is ordered "what can break right now → unfinished work → recurring operations → pitfalls and lessons → persona essentials". The predecessor's memory directories are matched to your local repos by `origin`, and only the matched repos get two link lines in their memory. If you want to go deeper, the predecessor's `feedback`-type memories can be copied as `inherited_<id>_`-prefixed files, and two commands undo that.
 
-## PR 받는 사람
+## Reviewer
 
-PR 의 CI(`qa`)가 통과했는지 확인하고, 내용을 한 번 훑어본 뒤 머지한다.
-FAIL 이면 히트 파일을 보고 올린 사람에게 수정을 요청한다. `main` 직접 푸시는 하지 않는다.
-훑어볼 때 `persona.md` 와 `memory-export/` 에 에이전트에게 무언가를 실행하라고 지시하는 문장이 섞여 있지 않은지 본다 — 인계자의 에이전트가 그 파일을 읽는다.
+Check that the PR's CI (`qa`) passed, skim the contents, and merge.
+On FAIL, look at the flagged file and ask the author to fix it. Never push to `main` directly.
+While skimming, check that `persona.md` and `memory-export/` do not contain sentences that instruct an agent to run something — the successor's agent will read those files.
 
-## 구조
+## Layout
 
 ```text
-AGENTS.md                         Codex·Claude 공용 진입점(트리거·규칙). CLAUDE.md 는 이 파일을 가리킨다
-.dementorrc                       회사 이메일 도메인 설정
-prompts/upload.md                 퇴사자용 수집 절차
-prompts/inherit.md                인계자용 절차
-.claude/commands/                 /dementor-upload, /dementor-inherit (Claude Code 전용)
-scripts/qa.sh <id>                시크릿·전화번호·구조 검사
-scripts/qa.test.sh                qa.sh 테스트
-.github/workflows/qa.yml          PR 에서 변경된 ID 폴더마다 qa.sh 실행
-.github/workflows/ci.yml          도구 자체 검사(ShellCheck + qa.sh 테스트)
-<id>/                             id = 회사 이메일 @ 앞부분 (예: jane.doe)
-  handoff.md                      인수인계 본문 0~12절
-  persona.md                      설계 철학·판단 기준·작업 원칙
-  appendix/01~18                  소스별 수집 원자료
-  memory-export/<원본 디렉터리명>/  AI 메모리 원본 사본
-  memory-export/_config/          CLAUDE.md·rules·skills·Codex 설정 사본
-  inherit/<인계자id>-YYYY-MM-DD.md 인계자가 만든 요약
+AGENTS.md                         Shared entry point for Codex and Claude (triggers, rules). CLAUDE.md points to it
+.dementorrc                       Company email domain
+prompts/upload.md                 Collection procedure for the leaver
+prompts/inherit.md                Procedure for the successor
+.claude/commands/                 /dementor-upload, /dementor-inherit (Claude Code only)
+scripts/qa.sh <id>                Secret, phone-number, and structure checks
+scripts/qa.test.sh                Tests for qa.sh
+.github/workflows/qa.yml          Runs qa.sh on every ID folder changed in a PR
+.github/workflows/ci.yml          Self-test of the tooling (ShellCheck + qa.sh tests)
+<id>/                             id = company email before @ (e.g. jane.doe)
+  handoff.md                      Handoff document, sections 0–12
+  persona.md                      Design philosophy, judgment criteria, working principles
+  appendix/01–18                  Raw material per source
+  memory-export/<original dir>/   Copy of the AI memory originals
+  memory-export/_config/          Copy of CLAUDE.md, rules, skills, Codex settings
+  inherit/<successor-id>-YYYY-MM-DD.md  Summary written by the successor
 ```
 
-## 안전장치
+## Safeguards
 
-- **읽기 전용 수집**: 절차는 조회만 지시한다. 쓰는 곳은 레포의 자기 `<id>/` 폴더와 인계자 자신의 메모리뿐이다.
-- **공개 레포 차단**: 업로드를 시작하기 전과 푸시 직전에 레포 공개 여부를 확인하고, 공개면 멈춘다.
-- **시크릿 값은 기록하지 않는다**: 이름·경로·만료일만 적는다. 설정·토큰 파일은 복사 직후 지우고 `.gitignore` 가 한 번 더 막는다.
-- **사적 정보 제외**: 사적 DM·개인 프로젝트·가족·커리어 메모리는 수집하지 않고 제외 건수만 남긴다.
-- **QA 게이트 두 번**: `scripts/qa.sh` 가 시크릿·전화번호 패턴을 커밋 전(로컬)과 PR(CI)에서 검사한다. 한 건이라도 걸리면 FAIL 이다.
-- **PR 게이트**: 패키지는 `soul/<id>`, 인계 요약은 `inherit/<me>-<id>` 브랜치로만 올라간다.
-- **지어내지 않는다**: 근거 없는 문장은 쓰지 않고, 확신이 없으면 `(확인 필요)` 로 남긴다.
+- **Read-only collection**: the procedures only instruct queries. The only places written are your own `<id>/` folder in the repo and the successor's own memory.
+- **Public-repo guard**: before collection starts and right before pushing, the agent checks whether the repo is public and stops if it is.
+- **Secret values are never recorded**: only names, paths, and expiry dates. Settings and token files are deleted right after copying, and `.gitignore` blocks them once more.
+- **Private information excluded**: private DMs, personal projects, family, and career memories are not collected; only the count of excluded items is kept.
+- **Two QA gates**: `scripts/qa.sh` scans for secret and phone-number patterns before committing (locally) and on the PR (CI). A single hit is a FAIL.
+- **PR gate**: packages go up only on `soul/<id>` branches, inherit summaries only on `inherit/<me>-<id>`.
+- **No invention**: nothing is written without evidence; anything uncertain is marked `(확인 필요)` (needs confirmation).
 
-정규식 검사가 모든 시크릿을 잡지는 못한다. 자세한 위협 표면과 신고 방법은 [SECURITY.md](SECURITY.md) 에 있다.
+Regex scanning does not catch every secret. See [SECURITY.md](SECURITY.md) (Korean) for the threat surface and how to report.
 
-## 요구 사항
+## Requirements
 
-- [Claude Code](https://claude.com/claude-code) 또는 Codex CLI
-- `git`, `bash` 3.2 이상, `python3`(없으면 `node`)
-- [`gh`](https://cli.github.com/) — GitHub 수집, PR 생성, 공개 여부 확인에 쓴다. 없으면 해당 단계가 "미수집" 이 되거나 사용자에게 묻는다
-- 선택: Jira·Confluence·Notion·Slack MCP, AWS·GCP CLI 로그인
+- [Claude Code](https://claude.com/claude-code) or Codex CLI
+- `git`, `bash` 3.2+, `python3` (or `node`)
+- [`gh`](https://cli.github.com/) — used for GitHub collection, PR creation, and the public-repo check. Without it those steps become "not collected" or the agent asks you
+- Optional: Jira, Confluence, Notion, Slack MCP; AWS and GCP CLI logins
 
-## 한계
+## Limitations
 
-- 프롬프트와 산출물이 한국어다.
-- GitHub 기준이다(org 레포, PR, Actions).
-- ID 는 `^[a-z0-9]+(\.[a-z0-9]+)*$` 만 받는다. 이메일 앞부분에 밑줄·하이픈·대문자가 있으면 에이전트가 멈추고 ID 를 묻는다.
-- 회사 도메인은 하나만 설정할 수 있다.
-- `qa.sh` 의 전화번호 패턴은 한국 휴대폰 형식뿐이다.
-- AI 메모리는 Claude Code 자동 메모리와 Codex 설정을 대상으로 한다.
-
-## English quick start
-
-1. **Admin, once** — create a **private** repo in your org from this template, set `COMPANY_DOMAIN` in `.dementorrc` to your company email domain, and protect `main` (PRs required, `qa` check required). Never push a package to this public repo or a fork of it.
-2. **Leaver** — clone the private repo, open Claude Code or Codex at its root, and type `/dementor-upload` (Codex: "영혼 업로드"). In 1–2 hours a PR opens on `soul/<id>` with `handoff.md`, `persona.md`, 18 source appendices, and a copy of your AI memory. Collection is read-only; secret values, private DMs, and personal projects are excluded. The run ends with a "hand over in person before you leave" checklist (key rotation, sole-admin repos, automations on your personal account) in the terminal and the PR body.
-3. **Successor** — in the same repo, type `/dementor-inherit <id>` **before the leaver's last day**. You get a summary under `<id>/inherit/`, pointer links in your local AI memory (not copies), and a "ask the leaver now" question list for everything that only a person can hand over.
-4. **Reviewer** — merge when the `qa` check passes. It fails on any secret or phone-number pattern.
+- Prompts and generated documents are in Korean.
+- Built around GitHub (org repos, PRs, Actions).
+- IDs must match `^[a-z0-9]+(\.[a-z0-9]+)*$`. If the email local part has underscores, hyphens, or capitals, the agent stops and asks for an ID.
+- Only one company domain can be configured.
+- The phone-number pattern in `qa.sh` covers Korean mobile numbers only.
+- AI memory means Claude Code auto-memory and Codex settings.
 
 ## License
 

@@ -7,7 +7,7 @@
 ## 폴더 규칙
 
 - 최상위 폴더 하나가 사람 하나다. 폴더명(ID)은 회사 이메일의 `@` 앞부분 그대로다(예: `jane.doe`, `j.kim`). 정규식 `^[a-z0-9]+(\.[a-z0-9]+)*$` 에 맞아야 한다.
-- 예약된 최상위 이름(ID 로 쓸 수 없음): `AGENTS.md` `CLAUDE.md` `README.md` `SECURITY.md` `LICENSE` `prompts` `scripts` `.claude` `.github` `.dementorrc`
+- 예약된 최상위 이름(ID 로 쓸 수 없음): `AGENTS.md` `CLAUDE.md` `README.md` `README.ko.md` `SECURITY.md` `LICENSE` `prompts` `scripts` `.claude` `.github` `.dementorrc`
 - ID 폴더 안: `handoff.md` · `persona.md` · `appendix/01~18` · `memory-export/<원본 디렉터리명>/` · `memory-export/_config/` · `inherit/<인계자id>-YYYY-MM-DD.md` · `_raw/`(선택, 수집 스크립트 `.sh`·`.py` 만 추적)
 - 회사 도메인(이하 `<회사도메인>`): 레포 루트 `.dementorrc` 의 `COMPANY_DOMAIN` 값이다. `sed -n 's/^COMPANY_DOMAIN=//p' "$(git rev-parse --show-toplevel)/.dementorrc" | head -n 1 | tr -d "[:space:]\"'"` 로 읽는다(기억이나 추측으로 정하지 않는다). 값이 비었거나 `example.com` 이면 설정 전이므로 멈추고 "`.dementorrc` 의 `COMPANY_DOMAIN` 을 회사 이메일 도메인으로 바꿔 `main` 에 커밋하세요" 라고 알린다.
 - 자기 ID 결정(업로드·인계 공통): Claude 세션이면 시스템 프롬프트의 `userEmail`, 없으면 `git config user.email`, 둘 다 없으면 사용자에게 묻는다. 어느 출처든 도메인이 `<회사도메인>` 이 아니면(개인 메일·`users.noreply.github.com` 등) 다음 출처로 폴백하지 않고 멈춰서 회사 이메일을 묻는다. 출처가 `git config` 이면 쓰기 전에 "ID = `<id>` (출처: git config) 로 진행할까요?" 를 한 번 묻는다. `@` 앞부분을 그대로 쓰고, 정규식에 안 맞으면 멈추고 묻는다.
