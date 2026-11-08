@@ -27,7 +27,7 @@ The person leaving types `/dementor-upload` to their own AI agent; the person ta
   <img src=".github/assets/demo.gif" alt="Terminal demo: /dementor-upload collects, runs qa.sh, opens a PR and prints the hand-over-in-person checklist; /dementor-inherit jane.doe writes the summary, plants memory pointers and prints the questions to ask the predecessor" width="100%">
 </p>
 
-Scripted walkthrough on a fictional company (`acme.com`, leaver `jane.doe`, successor `j.kim`): the agent lines are condensed to the representative moments and translated to English for the demo (the real procedure prints Korean); the `qa.sh` run is real. Regenerate with [`vhs`](https://github.com/charmbracelet/vhs)` .github/assets/demo.tape`; the script is `.github/assets/demo.sh`.
+Scripted walkthrough on a fictional company (`acme.com`, leaver `jane.doe`, successor `j.kim`): the agent lines are condensed to the representative moments and translated to English for the demo (the real procedure prints Korean); the `qa.sh` run is real, with its Korean output translated line by line. Regenerate with [`vhs`](https://github.com/charmbracelet/vhs)` .github/assets/demo.tape`; the script is `.github/assets/demo.sh`.
 
 ## Why
 

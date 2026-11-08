@@ -4,6 +4,7 @@
 # 에이전트 출력은 업로드·인계 절차의 대표 장면을 압축한 각본이다(가짜 회사 acme.com, 가짜 사람 jane.doe·j.kim).
 # 실제 절차는 한국어로 출력한다 — en 은 데모를 위해 그 줄들을 번역한 것이다.
 # `bash scripts/qa.sh jane.doe` 만은 임시 폴더에 만든 가짜 패키지에 실제로 돈다(임시 경로만 ~/acme/dementor 로 바꿔 보여 준다).
+# en 은 그 한국어 출력도 줄 단위로 번역해 보여 준다(en_qa) — 검사 자체는 그대로다.
 set -u
 
 L="${1:-en}"
@@ -23,6 +24,38 @@ type_cmd() { # 프롬프트에 한 글자씩 입력하는 것처럼 보여 준�
 say() { printf '%b\n' "$1"; sleep "${2:-0.45}"; }
 say2() { # $1 = 한국어, $2 = English, $3 = 뒤에 쉴 초
   if [ "$L" = ko ]; then say "$1" "${3:-0.45}"; else say "$2" "${3:-0.45}"; fi
+}
+en_qa() { # ko 면 그대로 통과. en 이면 qa.sh 의 한국어 출력(이 가짜 패키지가 내는 줄들)을 영어로 바꿔 보여 준다.
+  if [ "$L" = ko ]; then cat; return; fi
+  sed \
+    -e 's/^   폴더: /   folder: /' \
+    -e 's/^-- 정보성 검사 (실패 아님)$/-- Informational checks (never a FAIL)/' \
+    -e 's/^handoff\.md: \([0-9]*\)줄, \([0-9]*\)바이트$/handoff.md: \1 lines, \2 bytes/' \
+    -e 's/^## 절 목록:$/## sections:/' \
+    -e 's/## 0\. 소스별 수집 상태$/## 0. Collection status per source/' \
+    -e 's/## 1\. 식별자·계정$/## 1. Identifiers · accounts/' \
+    -e 's/## 2\. 역할·담당 범위$/## 2. Role · scope of ownership/' \
+    -e 's/## 3\. 🔴 계정 비활성화 시 깨지는 자산(즉시 조치 순)$/## 3. 🔴 Assets that break when my account is disabled (act on these first)/' \
+    -e 's/## 4\. 🔴 진행 중·미완 작업$/## 4. 🔴 In-progress · unfinished work/' \
+    -e 's/## 5\. 반복 운영 업무$/## 5. Recurring operations/' \
+    -e 's/## 6\. 작업 이력 타임라인$/## 6. Work history timeline/' \
+    -e 's/## 7\. 의사결정 기록$/## 7. Decision log/' \
+    -e 's/## 8\. 함정·교훈$/## 8. Pitfalls · lessons/' \
+    -e 's/## 9\. 협업 관계$/## 9. Working relationships/' \
+    -e 's/## 10\. 커뮤니케이션 스타일·작업 원칙$/## 10. Communication style · working principles/' \
+    -e 's/## 11\. 문서·링크 인덱스$/## 11. Document · link index/' \
+    -e 's/## 12\. 미확인·확인 필요$/## 12. Unverified · needs confirmation/' \
+    -e 's/^인용 밀도: 근거(appendix 파일명 또는 URL)가 있는 줄 \([0-9]*\) \/ 비어있지 않은 줄 \([0-9]*\)$/citation density: \1 of \2 non-empty lines cite evidence (an appendix file or a URL)/' \
+    -e 's/^실존하지 않는 appendix 참조:$/references to appendix files that do not exist:/' \
+    -e 's/^   (없음)$/   (none)/' \
+    -e 's/^미인용 appendix 파일:$/appendix files never cited:/' \
+    -e "s/^'(추정)' 수: /'(추정)' (estimate) marks: /" \
+    -e 's/^persona\.md: 있음 (\([0-9]*\)줄)$/persona.md: present (\1 line(s))/' \
+    -e 's/^memory-export: 디렉터리 \([0-9]*\)개, 파일 \([0-9]*\)개, _config: 있음$/memory-export: \1 directories, \2 files, _config: present/' \
+    -e 's/^-- 차단 검사 (1건이라도 있으면 FAIL)$/-- Blocking checks (a single hit is a FAIL)/' \
+    -e 's/^회사 도메인 밖 이메일(정보성): \([0-9]*\)건  도메인: /emails outside the company domain (informational): \1  domains: /' \
+    -e 's/^시크릿 패턴: \([0-9]*\)건$/secret patterns: \1/' \
+    -e 's/^전화번호 패턴: \([0-9]*\)건$/phone-number patterns: \1/'
 }
 
 # --- qa.sh 가 실제로 검사할 가짜 패키지 ---
@@ -96,7 +129,7 @@ say2 "${B}3단계${R}  handoff.md 412줄 · persona.md 96줄 — 모든 문장�
      "${B}Step 3${R}  handoff.md 412 lines · persona.md 96 lines — every sentence cited (appendix or URL), 4 marked as estimates" 0.9
 say2 "${B}4단계${R}  QA" "${B}Step 4${R}  QA" 0.5
 type_cmd "bash scripts/qa.sh jane.doe"
-(cd "$T" && bash scripts/qa.sh jane.doe) | sed "s#$T#~/acme/dementor#"
+(cd "$T" && bash scripts/qa.sh jane.doe) | sed "s#$T#~/acme/dementor#" | en_qa
 sleep 3.5
 say ""
 say2 "${B}5단계${R}  git commit → push soul/jane.doe → gh pr create ${D}(body: heredoc)${R}" \
